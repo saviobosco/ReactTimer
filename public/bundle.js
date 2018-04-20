@@ -25793,7 +25793,7 @@
 	          { className: 'button secondary', onClick: _this2.onStatusChange("paused") },
 	          'Pause '
 	        );
-	      } else if (countdownStatus === 'paused') {
+	      } else {
 	        return React.createElement(
 	          'button',
 	          { className: 'button primary', onClick: _this2.onStatusChange("started") },
@@ -25823,21 +25823,65 @@
 	'use strict';
 
 	var React = __webpack_require__(8);
-
+	var Clock = __webpack_require__(232);
+	var Controls = __webpack_require__(234);
 	var Timer = React.createClass({
-	    displayName: 'Timer',
+	  displayName: 'Timer',
 
-	    render: function render() {
-	        return React.createElement(
-	            'div',
-	            null,
-	            React.createElement(
-	                'p',
-	                null,
-	                ' Timer component '
-	            )
-	        );
+	  getInitialState: function getInitialState() {
+	    return {
+	      count: 0,
+	      timerStatus: 'stopped'
+	    };
+	  },
+	  handleStatusChange: function handleStatusChange(newTimerStatus) {
+	    this.setState({ timerStatus: newTimerStatus });
+	  },
+	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	    if (this.state.timerStatus !== prevState.timerStatus) {
+	      switch (this.state.timerStatus) {
+	        case 'started':
+	          this.handleStart();
+	          break;
+	        case 'stopped':
+	          this.setState({ count: 0 });
+	        case 'paused':
+	          clearInterval(this.timer);
+	          this.timer = undefined;
+	          break;
+	      }
 	    }
+	  },
+	  componentWillUnmount: function componentWillUnmount() {
+	    clearInterval(this.timer);
+	    this.timer = undefined;
+	  },
+	  handleStart: function handleStart() {
+	    var _this = this;
+
+	    this.timer = setInterval(function () {
+	      _this.setState({
+	        count: _this.state.count + 1
+	      });
+	    }, 1000);
+	  },
+	  render: function render() {
+	    var _state = this.state,
+	        count = _state.count,
+	        timerStatus = _state.timerStatus;
+
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(
+	        'h1',
+	        { className: 'page-title' },
+	        ' Timer App'
+	      ),
+	      React.createElement(Clock, { totalSeconds: count }),
+	      React.createElement(Controls, { countdownStatus: timerStatus, onStatusChange: this.handleStatusChange })
+	    );
+	  }
 	});
 
 	module.exports = Timer;
